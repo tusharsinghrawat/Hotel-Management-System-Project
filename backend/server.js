@@ -14,12 +14,20 @@ dotenv.config();
 const app = express();
 
 // ================== MIDDLEWARES ==================
-app.use(cors());
+
+// ✅ CORS FIX (IMPORTANT)
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend URL
+    credentials: true,
+  })
+);
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // ✅ FIX: form data support
+app.use(express.urlencoded({ extended: true })); // form data support
 
 // ================== STATIC FILES ==================
-app.use("/uploads", express.static("uploads")); // ✅ FIX: images serve
+app.use("/uploads", express.static("uploads")); // images serve
 
 // ================== ROUTES ==================
 app.use("/api/auth", authRoutes);

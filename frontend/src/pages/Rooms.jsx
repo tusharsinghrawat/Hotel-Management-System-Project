@@ -29,12 +29,15 @@ export default function Rooms() {
     queryFn: async () => {
       const res = await api.get("/rooms");
 
-      // ✅ IMAGE DATA NORMALIZATION (NEW)
+      // ✅ IMAGE NORMALIZATION (SAME)
       return res.data.map((room) => ({
         ...room,
-        image_urls: Array.isArray(room.image_urls)
-          ? room.image_urls
-          : [],
+        image_urls:
+          Array.isArray(room.image_urls) && room.image_urls.length > 0
+            ? room.image_urls
+            : room.image
+            ? [room.image]
+            : [],
       }));
     },
   });
@@ -42,12 +45,15 @@ export default function Rooms() {
   const filteredRooms = rooms
     ?.filter((room) => {
       const matchesSearch =
-        room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        room.description?.toLowerCase().includes(searchQuery.toLowerCase());
+        room.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        room.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase());
 
+      // ✅ FIXED: tolerant room_type match
       const matchesType =
         roomTypeFilter === "all" ||
-        room.room_type === roomTypeFilter;
+        room.room_type?.toLowerCase() === roomTypeFilter;
 
       return matchesSearch && matchesType;
     })

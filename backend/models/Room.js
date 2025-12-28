@@ -4,13 +4,20 @@ const roomSchema = new mongoose.Schema(
   {
     name: String,
     description: String,
-    room_type: String,
+
+    // ✅ FIXED: Controlled room types (VERY IMPORTANT)
+    room_type: {
+      type: String,
+      enum: ["standard", "deluxe", "suite", "presidential"],
+      required: true,
+    },
+
     price_per_night: Number,
     capacity: Number,
     size_sqft: Number,
     amenities: [String],
 
-    // ✅ UPDATED: Support multiple images (10 images)
+    // ✅ Support multiple images (10 images)
     image_urls: {
       type: [String],
       default: [],

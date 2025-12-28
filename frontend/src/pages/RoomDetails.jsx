@@ -39,7 +39,7 @@ export default function RoomDetails() {
   const [specialRequests, setSpecialRequests] = useState('');
   const [isBooking, setIsBooking] = useState(false);
 
-  // 🔥 NEW: active image index (10 images support)
+  // ✅ active image index
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   /* ================= FETCH ROOM ================= */
@@ -156,15 +156,14 @@ export default function RoomDetails() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* LEFT */}
             <div className="lg:col-span-2 space-y-8">
-              {/* ===== IMAGES (10) ===== */}
+              {/* ===== IMAGES (FIXED) ===== */}
               <div>
                 {/* MAIN IMAGE */}
                 <div className="relative h-96 rounded-lg overflow-hidden mb-4">
                   <img
                     src={
-                      room.image_urls?.[activeImageIndex]
-                        ? `/images/rooms/${room.image_urls[activeImageIndex]}`
-                        : '/placeholder.svg'
+                      room.image_urls?.[activeImageIndex] ||
+                      '/placeholder.svg'
                     }
                     alt={room.name}
                     className="w-full h-full object-cover"
@@ -177,7 +176,7 @@ export default function RoomDetails() {
                     {room.image_urls.map((img, index) => (
                       <img
                         key={index}
-                        src={`/images/rooms/${img}`}
+                        src={img}
                         alt={`${room.name}-${index}`}
                         onClick={() => setActiveImageIndex(index)}
                         className={`h-20 w-full object-cover rounded cursor-pointer border

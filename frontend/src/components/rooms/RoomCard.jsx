@@ -11,12 +11,12 @@ const roomTypeLabels = {
 };
 
 export function RoomCard({ room }) {
-  // ✅ IMAGE RESOLUTION FIX
+  // ✅ IMAGE FIX (FINAL)
   const imageSrc =
-    room.image_url && room.image_url.startsWith("http")
-      ? room.image_url
-      : room.image_url
-      ? `/images/rooms/${room.image_url}` // public/images/rooms/
+    Array.isArray(room.image_urls) && room.image_urls.length > 0
+      ? room.image_urls[0].startsWith("http")
+        ? room.image_urls[0]
+        : room.image_urls[0] // 👈 DO NOT prepend /images/rooms
       : "/placeholder.svg";
 
   return (
@@ -26,8 +26,10 @@ export function RoomCard({ room }) {
         <img
           src={imageSrc}
           alt={room.name}
+          loading="lazy"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
+
         <div className="absolute top-4 left-4">
           <Badge
             variant="secondary"
@@ -46,7 +48,7 @@ export function RoomCard({ room }) {
         )}
       </div>
 
-      {/* Content */}
+      {/* Content (UNCHANGED) */}
       <div className="p-6">
         <div className="flex items-center gap-1 mb-2">
           {[...Array(5)].map((_, i) => (
@@ -84,7 +86,6 @@ export function RoomCard({ room }) {
             <span className="text-muted-foreground text-sm"> / night</span>
           </div>
 
-          {/* ✅ FIXED ID */}
           <Link to={`/rooms/${room._id}`}>
             <Button variant="gold" size="sm">
               View Details
