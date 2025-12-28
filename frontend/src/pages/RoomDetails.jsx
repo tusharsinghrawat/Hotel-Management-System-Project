@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { AvailabilityCalendar } from '@/components/rooms/AvailabilityCalendar';
-import api from '@/lib/api'; // ✅ NEW (MongoDB backend)
+import api from '@/lib/api';
 
 const roomTypeLabels = {
   standard: 'Standard Room',
@@ -38,6 +38,9 @@ export default function RoomDetails() {
   const [guests, setGuests] = useState('1');
   const [specialRequests, setSpecialRequests] = useState('');
   const [isBooking, setIsBooking] = useState(false);
+
+  // 🔥 NEW: active image index (10 images support)
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   /* ================= FETCH ROOM ================= */
   const { data: room, isLoading, error } = useQuery({
@@ -145,7 +148,7 @@ export default function RoomDetails() {
     );
   }
 
-  /* ================= JSX (UNCHANGED) ================= */
+  /* ================= JSX ================= */
   return (
     <Layout>
       <div className="pt-24 pb-16">
@@ -153,12 +156,40 @@ export default function RoomDetails() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* LEFT */}
             <div className="lg:col-span-2 space-y-8">
-              <div className="relative h-96 rounded-lg overflow-hidden">
-                <img
-                  src={room.image_url || '/placeholder.svg'}
-                  alt={room.name}
-                  className="w-full h-full object-cover"
-                />
+              {/* ===== IMAGES (10) ===== */}
+              <div>
+                {/* MAIN IMAGE */}
+                <div className="relative h-96 rounded-lg overflow-hidden mb-4">
+                  <img
+                    src={
+                      room.image_urls?.[activeImageIndex]
+                        ? `/images/rooms/${room.image_urls[activeImageIndex]}`
+                        : '/placeholder.svg'
+                    }
+                    alt={room.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* THUMBNAILS */}
+                {room.image_urls?.length > 0 && (
+                  <div className="grid grid-cols-5 gap-3">
+                    {room.image_urls.map((img, index) => (
+                      <img
+                        key={index}
+                        src={`/images/rooms/${img}`}
+                        alt={`${room.name}-${index}`}
+                        onClick={() => setActiveImageIndex(index)}
+                        className={`h-20 w-full object-cover rounded cursor-pointer border
+                          ${
+                            activeImageIndex === index
+                              ? 'border-accent'
+                              : 'border-transparent'
+                          }`}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>

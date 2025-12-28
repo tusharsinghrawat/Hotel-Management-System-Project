@@ -28,7 +28,14 @@ export default function Rooms() {
     queryKey: ["rooms"],
     queryFn: async () => {
       const res = await api.get("/rooms");
-      return res.data;
+
+      // ✅ IMAGE DATA NORMALIZATION (NEW)
+      return res.data.map((room) => ({
+        ...room,
+        image_urls: Array.isArray(room.image_urls)
+          ? room.image_urls
+          : [],
+      }));
     },
   });
 

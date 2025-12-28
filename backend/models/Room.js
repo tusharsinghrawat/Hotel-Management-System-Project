@@ -9,7 +9,13 @@ const roomSchema = new mongoose.Schema(
     capacity: Number,
     size_sqft: Number,
     amenities: [String],
-    image_url: String,
+
+    // ✅ UPDATED: Support multiple images (10 images)
+    image_urls: {
+      type: [String],
+      default: [],
+    },
+
     is_available: {
       type: Boolean,
       default: true,
