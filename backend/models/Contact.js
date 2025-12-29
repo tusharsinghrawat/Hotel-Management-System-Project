@@ -10,9 +10,9 @@ const contactSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    subject: {          // ✅ ADD THIS
+    subject: {
       type: String,
-      required: true,
+      default: "", // ✅ FIXED (optional)
     },
     message: {
       type: String,

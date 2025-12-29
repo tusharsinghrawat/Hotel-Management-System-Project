@@ -5,7 +5,6 @@ const roomSchema = new mongoose.Schema(
     name: String,
     description: String,
 
-    // ✅ FIXED: Controlled room types (VERY IMPORTANT)
     room_type: {
       type: String,
       enum: ["standard", "deluxe", "suite", "presidential"],
@@ -17,10 +16,21 @@ const roomSchema = new mongoose.Schema(
     size_sqft: Number,
     amenities: [String],
 
-    // ✅ Support multiple images (10 images)
+    // ✅ FINAL FIX: image_urls validation + cleanup
     image_urls: {
       type: [String],
       default: [],
+      validate: {
+        validator: function (arr) {
+          return arr.every(
+            (img) =>
+              typeof img === "string" &&
+              img.trim() !== "" &&
+              img !== "/rooms"
+          );
+        },
+        message: "Image URLs cannot be empty or invalid",
+      },
     },
 
     is_available: {
@@ -30,5 +40,15 @@ const roomSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ✅ AUTO-CLEAN before save/update
+roomSchema.pre("save", function (next) {
+  if (Array.isArray(this.image_urls)) {
+    this.image_urls = this.image_urls
+      .map((img) => img.trim())
+      .filter((img) => img && img !== "/rooms");
+  }
+  next();
+});
 
 export default mongoose.model("Room", roomSchema);

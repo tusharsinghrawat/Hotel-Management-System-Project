@@ -11,19 +11,38 @@ const router = express.Router();
  */
 router.post("/", protect, async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    const {
+      room,
+      checkInDate,
+      checkOutDate,
+      guests,
+      totalPrice,
+      specialRequests,
+    } = req.body;
+
+    // ✅ Required fields check
+    if (!room || !checkInDate || !checkOutDate || !guests) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const booking = await Booking.create({
       user: req.user._id,
-      room: req.body.room,
-      checkIn: req.body.checkIn,
-      checkOut: req.body.checkOut,
-      guests: req.body.guests,
-      totalPrice: req.body.totalPrice,
+      room,
+      checkInDate,
+      checkOutDate,
+      guests,
+      totalPrice: totalPrice || 0,
       status: "confirmed",
-      specialRequests: req.body.specialRequests || "",
+      specialRequests: specialRequests || "",
     });
 
     res.status(201).json(booking);
   } catch (error) {
+    console.error("Booking Route Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -34,6 +53,10 @@ router.post("/", protect, async (req, res) => {
  */
 router.get("/my", protect, async (req, res) => {
   try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
     const bookings = await Booking.find({ user: req.user._id })
       .populate("room")
       .sort({ createdAt: -1 });

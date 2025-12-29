@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import User from "../models/User.js"; // ✅ FIXED (WAS Room.js)
 
 export const protect = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -19,6 +19,7 @@ export const protect = async (req, res, next) => {
 
     next();
   } catch (error) {
+    console.error("Auth Error:", error.message);
     return res.status(401).json({ message: "Invalid token" });
   }
 };

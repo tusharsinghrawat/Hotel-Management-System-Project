@@ -24,10 +24,18 @@ app.use(
 );
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // form data support
+app.use(express.urlencoded({ extended: true }));
 
 // ================== STATIC FILES ==================
-app.use("/uploads", express.static("uploads")); // images serve
+
+// existing uploads (UNCHANGED)
+app.use("/uploads", express.static("uploads"));
+
+// ✅ NEW: serve room images
+app.use(
+  "/rooms",
+  express.static(path.join(process.cwd(), "frontend/public/rooms"))
+);
 
 // ================== ROUTES ==================
 app.use("/api/auth", authRoutes);

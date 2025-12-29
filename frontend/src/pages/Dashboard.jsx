@@ -50,7 +50,6 @@ export default function Dashboard() {
     <Layout>
       <div className="pt-32 pb-16 min-h-screen bg-secondary">
         <div className="container mx-auto px-4">
-
           {/* Welcome */}
           <div className="mb-12">
             <h1 className="text-4xl font-serif font-bold mb-2">
@@ -71,12 +70,12 @@ export default function Dashboard() {
             <StatCard
               icon={<Clock className="h-6 w-6 text-green-600" />}
               label="Active Bookings"
-              value={bookings.filter(b => b.status === "confirmed").length}
+              value={bookings.filter((b) => b.status === "confirmed").length}
             />
             <StatCard
               icon={<MapPin className="h-6 w-6 text-blue-600" />}
               label="Completed Stays"
-              value={bookings.filter(b => b.status === "completed").length}
+              value={bookings.filter((b) => b.status === "completed").length}
             />
           </div>
 
@@ -96,7 +95,11 @@ export default function Dashboard() {
                 >
                   <div className="w-full md:w-48 h-32 rounded-lg overflow-hidden">
                     <img
-                      src={booking.room?.image || "/placeholder.svg"}
+                      src={
+                        booking.room?.image_urls?.[0]
+                          ? `/rooms/${booking.room.image_urls[0]}`
+                          : "/placeholder.svg"
+                      }
                       alt={booking.room?.name}
                       className="w-full h-full object-cover"
                     />
@@ -115,11 +118,25 @@ export default function Dashboard() {
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="font-medium">Check-in</p>
-                        <p>{format(new Date(booking.checkIn), "PP")}</p>
+                        <p>
+                          {booking.checkInDate
+                            ? format(
+                                new Date(booking.checkInDate),
+                                "PP"
+                              )
+                            : "N/A"}
+                        </p>
                       </div>
                       <div>
                         <p className="font-medium">Check-out</p>
-                        <p>{format(new Date(booking.checkOut), "PP")}</p>
+                        <p>
+                          {booking.checkOutDate
+                            ? format(
+                                new Date(booking.checkOutDate),
+                                "PP"
+                              )
+                            : "N/A"}
+                        </p>
                       </div>
                       <div>
                         <p className="font-medium">Guests</p>
@@ -135,7 +152,8 @@ export default function Dashboard() {
 
                     {booking.specialRequests && (
                       <p className="text-sm mt-2 text-muted-foreground">
-                        <b>Special Requests:</b> {booking.specialRequests}
+                        <b>Special Requests:</b>{" "}
+                        {booking.specialRequests}
                       </p>
                     )}
                   </div>
@@ -145,7 +163,9 @@ export default function Dashboard() {
           ) : (
             <div className="text-center py-12 bg-card rounded-lg">
               <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">No Bookings Yet</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                No Bookings Yet
+              </h3>
               <Button variant="gold" onClick={() => navigate("/rooms")}>
                 Browse Rooms
               </Button>

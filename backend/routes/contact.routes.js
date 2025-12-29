@@ -10,25 +10,26 @@ const router = express.Router();
  */
 router.post("/", async (req, res) => {
   try {
-    console.log("CONTACT API HIT");            // 🔴 ADD
-    console.log("REQUEST BODY:", req.body);    // 🔴 ADD
+    console.log("CONTACT API HIT");
+    console.log("REQUEST BODY:", req.body);
 
     const { name, email, subject, message } = req.body;
 
-    if (!name || !email || !subject || !message) {
+    // ✅ FIX: subject optional
+    if (!name || !email || !message) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const contact = await Contact.create({
       name,
       email,
-      subject,
+      subject: subject || "", // ✅ safe default
       message,
     });
 
-    console.log("CONTACT SAVED:", contact);    // 🔴 ADD
+    console.log("CONTACT SAVED:", contact);
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: "Message received successfully",
     });

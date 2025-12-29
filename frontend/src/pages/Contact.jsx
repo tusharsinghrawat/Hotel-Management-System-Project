@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import api from "@/lib/api"; // ✅ THIS WAS MISSING
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -57,19 +58,34 @@ export default function Contact() {
   });
 
   const handleSubmit = async (data) => {
+  try {
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
+
+    // ✅ REAL API CALL
+    await api.post("/contact", {
+      name: data.name,
+      email: data.email,
+      subject: data.subject, // optional but supported
+      message: data.message,
+    });
+
     toast({
-      title: 'Message sent!',
+      title: "Message sent!",
       description: "We'll get back to you as soon as possible.",
     });
-    
+
     form.reset();
+  } catch (error) {
+    toast({
+      variant: "destructive",
+      title: "Failed to send message",
+      description:
+        error.response?.data?.message || "Something went wrong",
+    });
+  } finally {
     setIsSubmitting(false);
-  };
+  }
+};
 
   return (
     <Layout>

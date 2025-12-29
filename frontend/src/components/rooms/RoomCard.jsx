@@ -11,13 +11,39 @@ const roomTypeLabels = {
 };
 
 export function RoomCard({ room }) {
-  // ✅ IMAGE FIX (FINAL)
-  const imageSrc =
-    Array.isArray(room.image_urls) && room.image_urls.length > 0
-      ? room.image_urls[0].startsWith("http")
-        ? room.image_urls[0]
-        : room.image_urls[0] // 👈 DO NOT prepend /images/rooms
-      : "/placeholder.svg";
+  // ✅ UPGRADED IMAGE LOGIC (NO DOUBLE /rooms, NO BAD ENCODING)
+  const getImageSrc = () => {
+    if (!Array.isArray(room.image_urls) || room.image_urls.length === 0) {
+      return "/placeholder.svg";
+    }
+
+    const raw = room.image_urls[0];
+
+    if (!raw || typeof raw !== "string") {
+      return "/placeholder.svg";
+    }
+
+    const clean = raw.trim();
+
+    if (clean === "" || clean === "/rooms") {
+      return "/placeholder.svg";
+    }
+
+    // Full URL (Cloudinary etc.)
+    if (clean.startsWith("http")) {
+      return clean;
+    }
+
+    // Already correct public path
+    if (clean.startsWith("/rooms/")) {
+      return clean;
+    }
+
+    // Only filename → prepend /rooms
+    return `/rooms/${encodeURIComponent(clean)}`;
+  };
+
+  const imageSrc = getImageSrc();
 
   return (
     <div className="group bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -27,6 +53,10 @@ export function RoomCard({ room }) {
           src={imageSrc}
           alt={room.name}
           loading="lazy"
+          onError={(e) => {
+            console.error("❌ Image failed:", imageSrc);
+            e.currentTarget.src = "/placeholder.svg";
+          }}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
 

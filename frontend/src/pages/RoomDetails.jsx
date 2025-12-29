@@ -62,59 +62,62 @@ export default function RoomDetails() {
   };
 
   /* ================= BOOK ROOM ================= */
-  const handleBooking = async () => {
-    if (!user) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication required',
-        description: 'Please sign in to book a room.',
-      });
-      navigate('/auth');
-      return;
-    }
+  // ================= BOOK ROOM =================
+const handleBooking = async () => {
+  if (!user) {
+    toast({
+      variant: 'destructive',
+      title: 'Authentication required',
+      description: 'Please sign in to book a room.',
+    });
+    navigate('/auth');
+    return;
+  }
 
-    if (!checkIn || !checkOut || nights < 1) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid dates',
-        description: 'Please select valid check-in and check-out dates.',
-      });
-      return;
-    }
+  if (!checkIn || !checkOut || nights < 1) {
+    toast({
+      variant: 'destructive',
+      title: 'Invalid dates',
+      description: 'Please select valid check-in and check-out dates.',
+    });
+    return;
+  }
 
-    try {
-      setIsBooking(true);
+  try {
+    setIsBooking(true);
 
-      await api.post('/bookings', {
-        room_id: id,
-        check_in: format(checkIn, 'yyyy-MM-dd'),
-        check_out: format(checkOut, 'yyyy-MM-dd'),
-        total_price: totalPrice,
-        guests: Number(guests),
-        special_requests: specialRequests || null,
-      });
+    // ✅ FIXED PAYLOAD (MATCHES BACKEND)
+    await api.post('/bookings', {
+      room: id,
+      checkInDate: format(checkIn, 'yyyy-MM-dd'),
+      checkOutDate: format(checkOut, 'yyyy-MM-dd'),
+      guests: Number(guests),
+      totalPrice: totalPrice,
+      specialRequests: specialRequests || '',
+    });
 
-      queryClient.invalidateQueries({
-        queryKey: ['room-bookings', id],
-      });
+    queryClient.invalidateQueries({
+      queryKey: ['room-bookings', id],
+    });
 
-      toast({
-        title: 'Booking confirmed!',
-        description: 'Your room has been booked successfully.',
-      });
+    toast({
+      title: 'Booking confirmed!',
+      description: 'Your room has been booked successfully.',
+    });
 
-      navigate('/dashboard');
-    } catch (err) {
-      toast({
-        variant: 'destructive',
-        title: 'Booking failed',
-        description:
-          err.response?.data?.message || 'Something went wrong',
-      });
-    } finally {
-      setIsBooking(false);
-    }
-  };
+    navigate('/dashboard');
+  } catch (err) {
+    toast({
+      variant: 'destructive',
+      title: 'Booking failed',
+      description:
+        err.response?.data?.message || 'Something went wrong',
+    });
+  } finally {
+    setIsBooking(false);
+  }
+};
+
 
   /* ================= LOADING ================= */
   if (isLoading) {

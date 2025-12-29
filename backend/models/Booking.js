@@ -7,33 +7,45 @@ const bookingSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
     room: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Room",
       required: true,
     },
-    checkIn: {
+
+    // ✅ FIXED FIELD NAMES (MATCH FRONTEND + CONTROLLER)
+    checkInDate: {
       type: Date,
       required: true,
     },
-    checkOut: {
+
+    checkOutDate: {
       type: Date,
       required: true,
     },
+
     guests: {
       type: Number,
       required: true,
+      min: 1,
     },
+
     totalPrice: {
       type: Number,
-      required: true,
+      default: 0,
     },
+
     status: {
       type: String,
       enum: ["pending", "confirmed", "cancelled", "completed"],
       default: "confirmed",
     },
-    specialRequests: String,
+
+    specialRequests: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true }
 );
