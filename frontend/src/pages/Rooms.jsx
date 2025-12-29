@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, SlidersHorizontal } from "lucide-react";
 
@@ -21,7 +21,7 @@ export default function Rooms() {
   const [priceSort, setPriceSort] = useState("default");
 
   const {
-    data: rooms,
+    data: rooms = [],
     isLoading,
     error,
   } = useQuery({
@@ -29,41 +29,61 @@ export default function Rooms() {
     queryFn: async () => {
       const res = await api.get("/rooms");
 
-      // ✅ IMAGE NORMALIZATION (SAME)
-      return res.data.map((room) => ({
-        ...room,
-        image_urls:
-          Array.isArray(room.image_urls) && room.image_urls.length > 0
-            ? room.image_urls
-            : room.image
-            ? [room.image]
-            : [],
-      }));
+      return res.data.map((room) => {
+        let images = [];
+
+        if (Array.isArray(room.image_urls) && room.image_urls.length > 0) {
+          images = room.image_urls;
+        } else if (room.image) {
+          images = [room.image];
+        }
+
+        // ✅ BASE-SAFE FIX (NO leading slash)
+const normalizedImages = images
+  .map((img) => {
+    if (!img || typeof img !== "string") return null;
+
+    // 🔥 FORCE CLEAN: remove any path
+    return img.split("/").pop(); // room-4.jpg
+  })
+  .filter(Boolean);
+
+return {
+  ...room,
+  image_urls:
+    normalizedImages.length > 0
+      ? normalizedImages
+      : ["placeholder.svg"],
+};
+
+
+      });
     },
   });
 
-  const filteredRooms = rooms
-    ?.filter((room) => {
-      const matchesSearch =
-        room.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        room.description
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase());
+  const filteredRooms = useMemo(() => {
+    return rooms
+      .filter((room) => {
+        const matchesSearch =
+          room.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          room.description
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase());
 
-      // ✅ FIXED: tolerant room_type match
-      const matchesType =
-        roomTypeFilter === "all" ||
-        room.room_type?.toLowerCase() === roomTypeFilter;
+        const matchesType =
+          roomTypeFilter === "all" ||
+          room.room_type?.toLowerCase() === roomTypeFilter;
 
-      return matchesSearch && matchesType;
-    })
-    .sort((a, b) => {
-      if (priceSort === "low-high")
-        return a.price_per_night - b.price_per_night;
-      if (priceSort === "high-low")
-        return b.price_per_night - a.price_per_night;
-      return 0;
-    });
+        return matchesSearch && matchesType;
+      })
+      .sort((a, b) => {
+        if (priceSort === "low-high")
+          return a.price_per_night - b.price_per_night;
+        if (priceSort === "high-low")
+          return b.price_per_night - a.price_per_night;
+        return 0;
+      });
+  }, [rooms, searchQuery, roomTypeFilter, priceSort]);
 
   return (
     <Layout>
@@ -98,10 +118,7 @@ export default function Rooms() {
             </div>
 
             <div className="flex flex-wrap gap-4 items-center">
-              <Select
-                value={roomTypeFilter}
-                onValueChange={setRoomTypeFilter}
-              >
+              <Select value={roomTypeFilter} onValueChange={setRoomTypeFilter}>
                 <SelectTrigger className="w-40">
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
                   <SelectValue placeholder="Room Type" />
@@ -111,16 +128,11 @@ export default function Rooms() {
                   <SelectItem value="standard">Standard</SelectItem>
                   <SelectItem value="deluxe">Deluxe</SelectItem>
                   <SelectItem value="suite">Suite</SelectItem>
-                  <SelectItem value="presidential">
-                    Presidential
-                  </SelectItem>
+                  <SelectItem value="presidential">Presidential</SelectItem>
                 </SelectContent>
               </Select>
 
-              <Select
-                value={priceSort}
-                onValueChange={setPriceSort}
-              >
+              <Select value={priceSort} onValueChange={setPriceSort}>
                 <SelectTrigger className="w-40">
                   <SelectValue placeholder="Sort by Price" />
                 </SelectTrigger>
@@ -164,7 +176,7 @@ export default function Rooms() {
                 Error loading rooms. Please try again.
               </p>
             </div>
-          ) : filteredRooms && filteredRooms.length > 0 ? (
+          ) : filteredRooms.length > 0 ? (
             <>
               <p className="text-muted-foreground mb-8">
                 Showing {filteredRooms.length} room

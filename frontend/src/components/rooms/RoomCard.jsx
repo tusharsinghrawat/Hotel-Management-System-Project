@@ -10,37 +10,30 @@ const roomTypeLabels = {
   presidential: "Presidential",
 };
 
+const BASE = import.meta.env.BASE_URL;
+
 export function RoomCard({ room }) {
-  // ✅ UPGRADED IMAGE LOGIC (NO DOUBLE /rooms, NO BAD ENCODING)
+  // ✅ BASE-SAFE IMAGE LOGIC (SINGLE SOURCE OF PREFIX)
   const getImageSrc = () => {
+    // no images
     if (!Array.isArray(room.image_urls) || room.image_urls.length === 0) {
-      return "/placeholder.svg";
+      return `${BASE}rooms/placeholder.svg`;
     }
 
     const raw = room.image_urls[0];
-
     if (!raw || typeof raw !== "string") {
-      return "/placeholder.svg";
+      return `${BASE}rooms/placeholder.svg`;
     }
 
     const clean = raw.trim();
 
-    if (clean === "" || clean === "/rooms") {
-      return "/placeholder.svg";
-    }
-
-    // Full URL (Cloudinary etc.)
+    // external URL (Cloudinary etc.)
     if (clean.startsWith("http")) {
       return clean;
     }
 
-    // Already correct public path
-    if (clean.startsWith("/rooms/")) {
-      return clean;
-    }
-
-    // Only filename → prepend /rooms
-    return `/rooms/${encodeURIComponent(clean)}`;
+    // raw MUST be filename only (room-1.jpg)
+    return `${BASE}rooms/${clean}`;
   };
 
   const imageSrc = getImageSrc();
@@ -55,7 +48,7 @@ export function RoomCard({ room }) {
           loading="lazy"
           onError={(e) => {
             console.error("❌ Image failed:", imageSrc);
-            e.currentTarget.src = "/placeholder.svg";
+            e.currentTarget.src = `${BASE}rooms/placeholder.svg`;
           }}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
         />
