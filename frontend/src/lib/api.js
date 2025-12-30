@@ -1,9 +1,16 @@
 import axios from "axios";
 
+// 🔥 Detect backend availability (demo-safe)
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ||
+  import.meta.env.VITE_API_URL ||
+  "";
+
+// ✅ Create axios instance
 const api = axios.create({
-  // ✅ ENV based baseURL (DEV + PROD safe)
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api",
+  baseURL: "http://localhost:5000/api",
   withCredentials: true,
+  timeout: 8000, // 🔥 avoid infinite wait when backend OFF
 });
 
 // ================= REQUEST INTERCEPTOR =================
@@ -27,15 +34,22 @@ api.interceptors.request.use(
   }
 );
 
-// ================= RESPONSE INTERCEPTOR (OPTIONAL BUT USEFUL) =================
+// ================= RESPONSE INTERCEPTOR =================
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // 🔥 BACKEND OFF / NETWORK ERROR → silent fail
+    if (!error.response) {
+      console.warn("Backend not reachable (demo mode)");
+      return Promise.reject(error);
+    }
+
     // 🔥 Auto logout on auth failure
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
       console.warn("Unauthorized – token removed");
     }
+
     return Promise.reject(error);
   }
 );

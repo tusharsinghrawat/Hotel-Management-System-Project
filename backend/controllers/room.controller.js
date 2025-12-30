@@ -1,18 +1,17 @@
 import Room from "../models/Room.js";
 
-// 🔥 helper function (NEW)
+// 🔥 helper function (UPDATED for frontend images)
 const normalizeImages = (room) => {
   const data = room._doc ? room._doc : room;
 
   return {
     ...data,
-    image_urls: Array.isArray(data.image_urls)
-      ? data.image_urls.map(img =>
-          img.startsWith("http")
-            ? img
-            : `/rooms/${img.trim()}`
-        )
-      : [],
+
+    // ✅ single image field (frontend handles path)
+    image:
+      typeof data.image === "string" && data.image.trim()
+        ? data.image.trim()
+        : "placeholder.svg",
   };
 };
 

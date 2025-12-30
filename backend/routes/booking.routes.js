@@ -3,6 +3,9 @@ import Booking from "../models/Booking.js";
 import { protect } from "../middleware/auth.middleware.js";
 import { adminOnly } from "../middleware/admin.middleware.js";
 
+// 🔥 ADD THIS IMPORT
+import { getBookingsByRoom } from "../controllers/booking.controller.js";
+
 const router = express.Router();
 
 /**
@@ -24,7 +27,6 @@ router.post("/", protect, async (req, res) => {
       specialRequests,
     } = req.body;
 
-    // ✅ Required fields check
     if (!room || !checkInDate || !checkOutDate || !guests) {
       return res.status(400).json({ message: "Missing required fields" });
     }
@@ -66,6 +68,14 @@ router.get("/my", protect, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+/**
+ * 🔥 NEW REQUIRED ROUTE
+ * @route   GET /api/bookings/room/:roomId
+ * @desc    Get bookings by room (Calendar)
+ * @access  Public
+ */
+router.get("/room/:roomId", getBookingsByRoom);
 
 /**
  * @route   GET /api/bookings

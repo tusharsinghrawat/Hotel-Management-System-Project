@@ -31,11 +31,11 @@ app.use(express.urlencoded({ extended: true }));
 // existing uploads (UNCHANGED)
 app.use("/uploads", express.static("uploads"));
 
-// ✅ NEW: serve room images
-app.use(
-  "/rooms",
-  express.static(path.join(process.cwd(), "frontend/public/rooms"))
-);
+// ❌ REMOVE THIS (frontend now handles room images)
+// app.use(
+//   "/rooms",
+//   express.static(path.join(process.cwd(), "frontend/public/rooms"))
+// );
 
 // ================== ROUTES ==================
 app.use("/api/auth", authRoutes);

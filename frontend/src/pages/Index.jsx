@@ -16,6 +16,8 @@ import { RoomCard } from "@/components/rooms/RoomCard";
 import heroImage from "@/assets/hero-hotel.jpg";
 import api from "@/lib/api";
 
+import { localRooms } from "@/data/rooms.local"; // 🔥 FRONTEND FALLBACK
+
 /* -------------------- Amenities -------------------- */
 
 const amenities = [
@@ -30,11 +32,25 @@ const amenities = [
 /* -------------------- Component -------------------- */
 
 export default function Index() {
-  const { data: featuredRooms, isLoading } = useQuery({
+  const { data: featuredRooms = [], isLoading } = useQuery({
     queryKey: ["featured-rooms"],
     queryFn: async () => {
-      const res = await api.get("/rooms/featured");
-      return res.data;
+      try {
+        // 🔹 TRY BACKEND FIRST
+        const res = await api.get("/rooms/featured");
+        return res.data;
+      } catch (err) {
+        // 🔥 BACKEND OFF → FRONTEND DATA
+        console.warn("Backend not available, using frontend featured rooms");
+
+        return localRooms
+          .filter((room) => room.is_available)
+          .slice(0, 3)
+          .map((room) => ({
+            ...room,
+            image_urls: [room.image || "placeholder.svg"],
+          }));
+      }
     },
   });
 
@@ -76,7 +92,6 @@ export default function Index() {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
           <div className="w-6 h-10 border-2 border-primary-foreground/50 rounded-full flex items-start justify-center p-2">
             <div className="w-1 h-3 bg-primary-foreground/50 rounded-full" />
@@ -152,7 +167,7 @@ export default function Index() {
                 </div>
               ))}
             </div>
-          ) : featuredRooms && featuredRooms.length > 0 ? (
+          ) : featuredRooms.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredRooms.map((room) => (
                 <RoomCard key={room._id} room={room} />

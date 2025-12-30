@@ -19,6 +19,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { AvailabilityCalendar } from '@/components/rooms/AvailabilityCalendar';
 import api from '@/lib/api';
 
+import { localRooms } from '@/data/rooms.local'; // 🔥 FRONTEND FALLBACK
+
 const roomTypeLabels = {
   standard: 'Standard Room',
   deluxe: 'Deluxe Room',
@@ -38,16 +40,29 @@ export default function RoomDetails() {
   const [guests, setGuests] = useState('1');
   const [specialRequests, setSpecialRequests] = useState('');
   const [isBooking, setIsBooking] = useState(false);
-
-  // ✅ active image index
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   /* ================= FETCH ROOM ================= */
   const { data: room, isLoading, error } = useQuery({
     queryKey: ['room', id],
     queryFn: async () => {
-      const res = await api.get(`/rooms/${id}`);
-      return res.data;
+      try {
+        // 🔹 TRY BACKEND FIRST
+        const res = await api.get(`/rooms/${id}`);
+        return res.data;
+      } catch (err) {
+        // 🔥 BACKEND OFF → FRONTEND DATA
+        const localRoom = localRooms.find((r) => r._id === id);
+
+        if (!localRoom) {
+          throw new Error('Room not found');
+        }
+
+        return {
+          ...localRoom,
+          image_urls: [localRoom.image || 'placeholder.svg'],
+        };
+      }
     },
   });
 
@@ -62,62 +77,59 @@ export default function RoomDetails() {
   };
 
   /* ================= BOOK ROOM ================= */
-  // ================= BOOK ROOM =================
-const handleBooking = async () => {
-  if (!user) {
-    toast({
-      variant: 'destructive',
-      title: 'Authentication required',
-      description: 'Please sign in to book a room.',
-    });
-    navigate('/auth');
-    return;
-  }
+  const handleBooking = async () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication required',
+        description: 'Please sign in to book a room.',
+      });
+      navigate('/auth');
+      return;
+    }
 
-  if (!checkIn || !checkOut || nights < 1) {
-    toast({
-      variant: 'destructive',
-      title: 'Invalid dates',
-      description: 'Please select valid check-in and check-out dates.',
-    });
-    return;
-  }
+    if (!checkIn || !checkOut || nights < 1) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid dates',
+        description: 'Please select valid check-in and check-out dates.',
+      });
+      return;
+    }
 
-  try {
-    setIsBooking(true);
+    try {
+      setIsBooking(true);
 
-    // ✅ FIXED PAYLOAD (MATCHES BACKEND)
-    await api.post('/bookings', {
-      room: id,
-      checkInDate: format(checkIn, 'yyyy-MM-dd'),
-      checkOutDate: format(checkOut, 'yyyy-MM-dd'),
-      guests: Number(guests),
-      totalPrice: totalPrice,
-      specialRequests: specialRequests || '',
-    });
+      await api.post('/bookings', {
+        room: id,
+        checkInDate: format(checkIn, 'yyyy-MM-dd'),
+        checkOutDate: format(checkOut, 'yyyy-MM-dd'),
+        guests: Number(guests),
+        totalPrice: totalPrice,
+        specialRequests: specialRequests || '',
+      });
 
-    queryClient.invalidateQueries({
-      queryKey: ['room-bookings', id],
-    });
+      queryClient.invalidateQueries({
+        queryKey: ['room-bookings', id],
+      });
 
-    toast({
-      title: 'Booking confirmed!',
-      description: 'Your room has been booked successfully.',
-    });
+      toast({
+        title: 'Booking confirmed!',
+        description: 'Your room has been booked successfully.',
+      });
 
-    navigate('/dashboard');
-  } catch (err) {
-    toast({
-      variant: 'destructive',
-      title: 'Booking failed',
-      description:
-        err.response?.data?.message || 'Something went wrong',
-    });
-  } finally {
-    setIsBooking(false);
-  }
-};
-
+      navigate('/dashboard');
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Booking failed',
+        description:
+          err.response?.data?.message || 'Something went wrong',
+      });
+    } finally {
+      setIsBooking(false);
+    }
+  };
 
   /* ================= LOADING ================= */
   if (isLoading) {
@@ -139,9 +151,6 @@ const handleBooking = async () => {
             <h1 className="text-2xl font-serif font-bold mb-4">
               Room Not Found
             </h1>
-            <p className="text-muted-foreground mb-6">
-              The room you're looking for doesn't exist.
-            </p>
             <Button variant="gold" onClick={() => navigate('/rooms')}>
               View All Rooms
             </Button>
@@ -159,21 +168,16 @@ const handleBooking = async () => {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* LEFT */}
             <div className="lg:col-span-2 space-y-8">
-              {/* ===== IMAGES (FIXED) ===== */}
+              {/* IMAGES */}
               <div>
-                {/* MAIN IMAGE */}
                 <div className="relative h-96 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={
-                      room.image_urls?.[activeImageIndex] ||
-                      '/placeholder.svg'
-                    }
+                    src={room.image_urls?.[activeImageIndex] || '/rooms/placeholder.svg'}
                     alt={room.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
 
-                {/* THUMBNAILS */}
                 {room.image_urls?.length > 0 && (
                   <div className="grid grid-cols-5 gap-3">
                     {room.image_urls.map((img, index) => (
@@ -182,12 +186,11 @@ const handleBooking = async () => {
                         src={img}
                         alt={`${room.name}-${index}`}
                         onClick={() => setActiveImageIndex(index)}
-                        className={`h-20 w-full object-cover rounded cursor-pointer border
-                          ${
-                            activeImageIndex === index
-                              ? 'border-accent'
-                              : 'border-transparent'
-                          }`}
+                        className={`h-20 w-full object-cover rounded cursor-pointer border ${
+                          activeImageIndex === index
+                            ? 'border-accent'
+                            : 'border-transparent'
+                        }`}
                       />
                     ))}
                   </div>
@@ -263,46 +266,6 @@ const handleBooking = async () => {
                   </span>
                   <span className="text-muted-foreground"> / night</span>
                 </div>
-
-                <div className="space-y-4 mb-6">
-                  <Select value={guests} onValueChange={setGuests}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[...Array(room.capacity)].map((_, i) => (
-                        <SelectItem key={i + 1} value={String(i + 1)}>
-                          {i + 1} Guest{i > 0 ? 's' : ''}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Textarea
-                    placeholder="Any special requests..."
-                    value={specialRequests}
-                    onChange={(e) =>
-                      setSpecialRequests(e.target.value)
-                    }
-                  />
-                </div>
-
-                {nights > 0 && (
-                  <div className="border-t pt-4 mb-6">
-                    <div className="flex justify-between">
-                      <span>
-                        ${room.price_per_night} x {nights}
-                      </span>
-                      <span>${totalPrice}</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total</span>
-                      <span className="text-accent">
-                        ${totalPrice}
-                      </span>
-                    </div>
-                  </div>
-                )}
 
                 <Button
                   variant="gold"

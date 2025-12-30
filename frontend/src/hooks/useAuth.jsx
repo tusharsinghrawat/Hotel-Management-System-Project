@@ -30,7 +30,6 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.post("/auth/login", { email, password });
 
-      // backend se token + user details aati hain
       localStorage.setItem("token", data.token);
       localStorage.setItem(
         "user",
@@ -61,17 +60,19 @@ export function AuthProvider({ children }) {
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: err.response?.data?.message || "Invalid credentials",
+        description:
+          err.response?.data?.message ||
+          "Backend not reachable or invalid credentials",
       });
       return { error: err };
     }
   };
 
-  // 🔹 Sign Up (FIXED)
+  // 🔹 Sign Up
   const signUp = async (email, password, fullName) => {
     try {
       await api.post("/auth/register", {
-        full_name: fullName, // ✅ IMPORTANT FIX
+        full_name: fullName,
         email,
         password,
       });
@@ -86,14 +87,16 @@ export function AuthProvider({ children }) {
       toast({
         variant: "destructive",
         title: "Sign up failed",
-        description: err.response?.data?.message || "Something went wrong",
+        description:
+          err.response?.data?.message ||
+          "Backend not reachable or user already exists",
       });
       return { error: err };
     }
   };
 
   // 🔹 Sign Out
-  const signOut = async () => {
+  const signOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 

@@ -17,15 +17,22 @@ export function AvailabilityCalendar({
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["room-bookings", roomId],
     queryFn: async () => {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/bookings/room/${roomId}`
-      );
+      try {
+        // 🔹 TRY BACKEND FIRST
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/api/bookings/room/${roomId}`
+        );
 
-      if (!res.ok) {
-        throw new Error("Failed to load bookings");
+        if (!res.ok) {
+          throw new Error("Failed to load bookings");
+        }
+
+        return res.json();
+      } catch (err) {
+        // 🔥 BACKEND OFF → NO BOOKINGS (ALL DATES AVAILABLE)
+        console.warn("Backend not available, calendar in demo mode");
+        return [];
       }
-
-      return res.json();
     },
     enabled: !!roomId,
   });

@@ -13,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import api from "@/lib/api";
+import { localRooms } from "@/data/rooms.local"; // 🔥 FRONTEND FALLBACK DATA
 
 export default function Rooms() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,37 +29,42 @@ export default function Rooms() {
   } = useQuery({
     queryKey: ["rooms"],
     queryFn: async () => {
-      const res = await api.get("/rooms");
+      try {
+        // 🔹 TRY BACKEND FIRST
+        const res = await api.get("/rooms");
 
-      return res.data.map((room) => {
-        let images = [];
+        return res.data.map((room) => {
+          let images = [];
 
-        if (Array.isArray(room.image_urls) && room.image_urls.length > 0) {
-          images = room.image_urls;
-        } else if (room.image) {
-          images = [room.image];
-        }
+          if (Array.isArray(room.image_urls) && room.image_urls.length > 0) {
+            images = room.image_urls;
+          } else if (room.image) {
+            images = [room.image];
+          }
 
-        // ✅ BASE-SAFE FIX (NO leading slash)
-const normalizedImages = images
-  .map((img) => {
-    if (!img || typeof img !== "string") return null;
+          const normalizedImages = images
+            .map((img) =>
+              typeof img === "string" ? img.split("/").pop() : null
+            )
+            .filter(Boolean);
 
-    // 🔥 FORCE CLEAN: remove any path
-    return img.split("/").pop(); // room-4.jpg
-  })
-  .filter(Boolean);
+          return {
+            ...room,
+            image_urls:
+              normalizedImages.length > 0
+                ? normalizedImages
+                : ["placeholder.svg"],
+          };
+        });
+      } catch (err) {
+        // 🔥 BACKEND OFF → USE FRONTEND DATA
+        console.warn("Backend not available, using frontend rooms data");
 
-return {
-  ...room,
-  image_urls:
-    normalizedImages.length > 0
-      ? normalizedImages
-      : ["placeholder.svg"],
-};
-
-
-      });
+        return localRooms.map((room) => ({
+          ...room,
+          image_urls: [room.image || "placeholder.svg"],
+        }));
+      }
     },
   });
 
@@ -173,7 +180,7 @@ return {
           ) : error ? (
             <div className="text-center py-12">
               <p className="text-destructive text-lg">
-                Error loading rooms. Please try again.
+                Error loading rooms.
               </p>
             </div>
           ) : filteredRooms.length > 0 ? (

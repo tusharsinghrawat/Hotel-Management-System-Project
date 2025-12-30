@@ -7,7 +7,6 @@ import Booking from "../models/Booking.js";
  */
 export const createBooking = async (req, res) => {
   try {
-    // ✅ Auth safety check
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "Not authorized" });
     }
@@ -20,12 +19,10 @@ export const createBooking = async (req, res) => {
       totalPrice,
     } = req.body;
 
-    // ✅ Required fields check (totalPrice optional)
     if (!room || !checkInDate || !checkOutDate || !guests) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // ✅ Date validation
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
 
@@ -35,7 +32,6 @@ export const createBooking = async (req, res) => {
         .json({ message: "Check-out must be after check-in" });
     }
 
-    // ✅ Safe price (frontend may not send it)
     const finalPrice = totalPrice || 0;
 
     const booking = await Booking.create({
@@ -71,6 +67,34 @@ export const getMyBookings = async (req, res) => {
 
     res.json(bookings);
   } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+/**
+ * ✅ NEW (REQUIRED)
+ * @desc   Get bookings by room (for availability calendar)
+ * @route  GET /api/bookings/room/:roomId
+ * @access Public
+ */
+export const getBookingsByRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    const bookings = await Booking.find(
+      { room: roomId },
+      "checkInDate checkOutDate"
+    );
+
+    // 🔥 Frontend expects: check_in / check_out
+    const formatted = bookings.map((b) => ({
+      check_in: b.checkInDate,
+      check_out: b.checkOutDate,
+    }));
+
+    res.json(formatted);
+  } catch (error) {
+    console.error("Get Bookings By Room Error:", error);
     res.status(500).json({ message: error.message });
   }
 };

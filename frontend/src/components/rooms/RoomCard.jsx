@@ -10,29 +10,26 @@ const roomTypeLabels = {
   presidential: "Presidential",
 };
 
-const BASE = import.meta.env.BASE_URL;
-
 export function RoomCard({ room }) {
-  // ✅ BASE-SAFE IMAGE LOGIC (SINGLE SOURCE OF PREFIX)
+  const BASE = import.meta.env.BASE_URL;
+
+  // ✅ FINAL, BULLETPROOF IMAGE LOGIC
   const getImageSrc = () => {
-    // no images
-    if (!Array.isArray(room.image_urls) || room.image_urls.length === 0) {
+    if (!room.image || typeof room.image !== "string") {
       return `${BASE}rooms/placeholder.svg`;
     }
 
-    const raw = room.image_urls[0];
-    if (!raw || typeof raw !== "string") {
-      return `${BASE}rooms/placeholder.svg`;
-    }
+    let clean = room.image.trim();
 
-    const clean = raw.trim();
+    // 🔥 NORMALIZE IMAGE NAME
+    // room3.jpg / room03.jpg → room-3.jpg
+    clean = clean.replace(/^room0*(\d+)/i, "room-$1");
 
-    // external URL (Cloudinary etc.)
+    // external image (cloudinary etc.)
     if (clean.startsWith("http")) {
       return clean;
     }
 
-    // raw MUST be filename only (room-1.jpg)
     return `${BASE}rooms/${clean}`;
   };
 
