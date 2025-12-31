@@ -3,11 +3,20 @@ import { Users, Maximize, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+/* 🇮🇳 Room type labels (unchanged) */
 const roomTypeLabels = {
   standard: "Standard",
   deluxe: "Deluxe",
   suite: "Suite",
   presidential: "Presidential",
+};
+
+/* 🇮🇳 Indian standard room rates (frontend controlled) */
+const ROOM_RATES = {
+  standard: 2999,
+  deluxe: 4999,
+  suite: 7999,
+  presidential: 12999,
 };
 
 export function RoomCard({ room }) {
@@ -34,6 +43,9 @@ export function RoomCard({ room }) {
   };
 
   const imageSrc = getImageSrc();
+
+  /* 🇮🇳 Decide rate by room type (ignore backend price) */
+  const roomRate = ROOM_RATES[room.room_type] || 0;
 
   return (
     <div className="group bg-card rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
@@ -101,7 +113,7 @@ export function RoomCard({ room }) {
         <div className="flex items-center justify-between pt-4 border-t border-border">
           <div>
             <span className="text-2xl font-serif font-bold text-accent">
-              ${room.price_per_night}
+              ₹{roomRate}
             </span>
             <span className="text-muted-foreground text-sm"> / night</span>
           </div>

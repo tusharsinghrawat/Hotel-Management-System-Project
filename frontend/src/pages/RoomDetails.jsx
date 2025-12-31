@@ -21,11 +21,20 @@ import api from '@/lib/api';
 
 import { localRooms } from '@/data/rooms.local'; // 🇮🇳 Frontend fallback rooms data
 
+/* 🇮🇳 Indian standard room labels */
 const roomTypeLabels = {
   standard: 'Standard Room',
   deluxe: 'Deluxe Room',
   suite: 'Luxury Suite',
   presidential: 'Presidential Suite',
+};
+
+/* 🇮🇳 Indian standard room rates (frontend controlled) */
+const ROOM_RATES = {
+  standard: 2999,
+  deluxe: 4999,
+  suite: 7999,
+  presidential: 12999,
 };
 
 export default function RoomDetails() {
@@ -47,17 +56,13 @@ export default function RoomDetails() {
     queryKey: ['room', id],
     queryFn: async () => {
       try {
-        // 🇮🇳 Fetch room details from backend
         const res = await api.get(`/rooms/${id}`);
         return res.data;
       } catch (err) {
-        // 🇮🇳 Backend unavailable → use local demo data
         const localRoom = localRooms.find((r) => r._id === id);
-
         if (!localRoom) {
           throw new Error('Room not found');
         }
-
         return {
           ...localRoom,
           image_urls: [localRoom.image || 'placeholder.svg'],
@@ -66,12 +71,12 @@ export default function RoomDetails() {
     },
   });
 
-  // 🇮🇳 Calculate number of nights (Indian hotel billing basis)
+  /* ================= PRICE CALCULATION ================= */
   const nights =
     checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
 
-  // 🇮🇳 Total price in INR (per night × nights, GST assumed handled separately)
-  const totalPrice = room ? nights * room.price_per_night : 0;
+  const roomRate = room ? ROOM_RATES[room.room_type] || 0 : 0;
+  const totalPrice = nights * roomRate;
 
   const handleDateSelect = (newCheckIn, newCheckOut) => {
     setCheckIn(newCheckIn);
@@ -104,10 +109,10 @@ export default function RoomDetails() {
 
       await api.post('/bookings', {
         room: id,
-        checkInDate: format(checkIn, 'yyyy-MM-dd'), // 🇮🇳 Stored format, UI shows DD/MM/YYYY
+        checkInDate: format(checkIn, 'yyyy-MM-dd'),
         checkOutDate: format(checkOut, 'yyyy-MM-dd'),
-        guests: Number(guests), // Adults count (Indian hotel standard)
-        totalPrice: totalPrice, // ₹ INR (final payable)
+        guests: Number(guests),
+        totalPrice: totalPrice, // 🇮🇳 INR price
         specialRequests: specialRequests || '',
       });
 
@@ -174,7 +179,10 @@ export default function RoomDetails() {
               <div>
                 <div className="relative h-96 rounded-lg overflow-hidden mb-4">
                   <img
-                    src={room.image_urls?.[activeImageIndex] || '/rooms/placeholder.svg'}
+                    src={
+                      room.image_urls?.[activeImageIndex] ||
+                      '/rooms/placeholder.svg'
+                    }
                     alt={room.name}
                     className="w-full h-full object-cover"
                   />
@@ -264,7 +272,7 @@ export default function RoomDetails() {
               <div className="sticky top-28 bg-card rounded-lg shadow-xl p-6 border">
                 <div className="text-center mb-6">
                   <span className="text-3xl font-serif font-bold text-accent">
-                    ₹{room.price_per_night}
+                    ₹{roomRate}
                   </span>
                   <span className="text-muted-foreground"> / night</span>
                 </div>
