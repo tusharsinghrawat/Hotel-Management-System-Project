@@ -18,7 +18,10 @@ const app = express();
 // ✅ CORS FIX (IMPORTANT)
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
+    origin: [
+      "http://localhost:5173",
+      "https://hotel-management-system-project-frontend.onrender.com"
+    ],
     credentials: true,
   })
 );
@@ -62,3 +65,4 @@ mongoose
   .catch((err) => {
     console.error("❌ MongoDB connection failed:", err.message);
   });
+
