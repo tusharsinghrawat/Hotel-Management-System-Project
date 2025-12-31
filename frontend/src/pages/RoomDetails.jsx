@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { AvailabilityCalendar } from '@/components/rooms/AvailabilityCalendar';
 import api from '@/lib/api';
 
-import { localRooms } from '@/data/rooms.local'; // 🔥 FRONTEND FALLBACK
+import { localRooms } from '@/data/rooms.local'; // 🇮🇳 Frontend fallback rooms data
 
 const roomTypeLabels = {
   standard: 'Standard Room',
@@ -47,11 +47,11 @@ export default function RoomDetails() {
     queryKey: ['room', id],
     queryFn: async () => {
       try {
-        // 🔹 TRY BACKEND FIRST
+        // 🇮🇳 Fetch room details from backend
         const res = await api.get(`/rooms/${id}`);
         return res.data;
       } catch (err) {
-        // 🔥 BACKEND OFF → FRONTEND DATA
+        // 🇮🇳 Backend unavailable → use local demo data
         const localRoom = localRooms.find((r) => r._id === id);
 
         if (!localRoom) {
@@ -66,9 +66,11 @@ export default function RoomDetails() {
     },
   });
 
+  // 🇮🇳 Calculate number of nights (Indian hotel billing basis)
   const nights =
     checkIn && checkOut ? differenceInDays(checkOut, checkIn) : 0;
 
+  // 🇮🇳 Total price in INR (per night × nights, GST assumed handled separately)
   const totalPrice = room ? nights * room.price_per_night : 0;
 
   const handleDateSelect = (newCheckIn, newCheckOut) => {
@@ -102,10 +104,10 @@ export default function RoomDetails() {
 
       await api.post('/bookings', {
         room: id,
-        checkInDate: format(checkIn, 'yyyy-MM-dd'),
+        checkInDate: format(checkIn, 'yyyy-MM-dd'), // 🇮🇳 Stored format, UI shows DD/MM/YYYY
         checkOutDate: format(checkOut, 'yyyy-MM-dd'),
-        guests: Number(guests),
-        totalPrice: totalPrice,
+        guests: Number(guests), // Adults count (Indian hotel standard)
+        totalPrice: totalPrice, // ₹ INR (final payable)
         specialRequests: specialRequests || '',
       });
 
@@ -262,7 +264,7 @@ export default function RoomDetails() {
               <div className="sticky top-28 bg-card rounded-lg shadow-xl p-6 border">
                 <div className="text-center mb-6">
                   <span className="text-3xl font-serif font-bold text-accent">
-                    ${room.price_per_night}
+                    ₹{room.price_per_night}
                   </span>
                   <span className="text-muted-foreground"> / night</span>
                 </div>

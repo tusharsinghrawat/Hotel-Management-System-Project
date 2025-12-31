@@ -9,7 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import api from "@/lib/api"; // ✅ THIS WAS MISSING
+import api from "@/lib/api"; // ✅ API integration
+
+/* -------------------- Validation -------------------- */
+/* 🇮🇳 Same validation rules – suitable for Indian contact forms */
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
@@ -18,28 +21,37 @@ const contactSchema = z.object({
   message: z.string().min(10, 'Message must be at least 10 characters').max(1000),
 });
 
-// Removed TypeScript type alias for JavaScript compatibility
+/* -------------------- Contact Info -------------------- */
+/* 🇮🇳 Indian-standard address, phone & timings */
 
 const contactInfo = [
   {
     icon: MapPin,
     title: 'Address',
-    details: ['123 Luxury Avenue', 'Downtown District', 'City, State 12345'],
+    details: [
+      'Grand Hotel',
+      'MG Road, Near City Center',
+      'Jaipur, Rajasthan – 302001, India',
+    ],
   },
   {
     icon: Phone,
     title: 'Phone',
-    details: ['+1 (555) 123-4567', '+1 (555) 987-6543'],
+    details: ['+91 98765 43210', '+91 91234 56789'],
   },
   {
     icon: Mail,
     title: 'Email',
-    details: ['info@grandhotel.com', 'reservations@grandhotel.com'],
+    details: ['info@grandhotel.in', 'reservations@grandhotel.in'],
   },
   {
     icon: Clock,
     title: 'Front Desk Hours',
-    details: ['24 Hours / 7 Days a Week', 'Check-in: 3:00 PM', 'Check-out: 11:00 AM'],
+    details: [
+      '24 Hours / 7 Days',
+      'Check-in: 12:00 PM',
+      'Check-out: 11:00 AM',
+    ],
   },
 ];
 
@@ -57,56 +69,64 @@ export default function Contact() {
     },
   });
 
+  /* -------------------- Submit -------------------- */
   const handleSubmit = async (data) => {
-  try {
-    setIsSubmitting(true);
+    try {
+      setIsSubmitting(true);
 
-    // ✅ REAL API CALL
-    await api.post("/contact", {
-      name: data.name,
-      email: data.email,
-      subject: data.subject, // optional but supported
-      message: data.message,
-    });
+      // 🇮🇳 Save customer enquiry
+      await api.post("/contact", {
+        name: data.name,
+        email: data.email,
+        subject: data.subject,
+        message: data.message,
+      });
 
-    toast({
-      title: "Message sent!",
-      description: "We'll get back to you as soon as possible.",
-    });
+      toast({
+        title: "Message sent successfully!",
+        description: "Our team will contact you shortly.",
+      });
 
-    form.reset();
-  } catch (error) {
-    toast({
-      variant: "destructive",
-      title: "Failed to send message",
-      description:
-        error.response?.data?.message || "Something went wrong",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      form.reset();
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to send message",
+        description:
+          error.response?.data?.message || "Something went wrong",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <Layout>
-      {/* Header */}
+      {/* 🇮🇳 Header */}
       <section className="pt-32 pb-16 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
-          <p className="text-accent font-medium tracking-widest mb-2 uppercase">Get in Touch</p>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Contact Us</h1>
+          <p className="text-accent font-medium tracking-widest mb-2 uppercase">
+            Get in Touch
+          </p>
+          <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">
+            Contact Us
+          </h1>
           <p className="text-primary-foreground/80 max-w-2xl mx-auto">
-            We'd love to hear from you. Reach out for reservations, inquiries, or just to say hello.
+            Have a question or need assistance? Reach out to us for bookings,
+            enquiries, or support.
           </p>
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* 🇮🇳 Contact Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid lg:grid-cols-3 gap-12">
             {/* Contact Info */}
             <div className="lg:col-span-1">
-              <h2 className="text-2xl font-serif font-bold mb-8">Contact Information</h2>
+              <h2 className="text-2xl font-serif font-bold mb-8">
+                Contact Information
+              </h2>
               <div className="space-y-8">
                 {contactInfo.map((info) => (
                   <div key={info.title} className="flex gap-4">
@@ -116,7 +136,12 @@ export default function Contact() {
                     <div>
                       <h3 className="font-semibold mb-1">{info.title}</h3>
                       {info.details.map((detail, i) => (
-                        <p key={i} className="text-muted-foreground text-sm">{detail}</p>
+                        <p
+                          key={i}
+                          className="text-muted-foreground text-sm"
+                        >
+                          {detail}
+                        </p>
                       ))}
                     </div>
                   </div>
@@ -127,14 +152,19 @@ export default function Contact() {
             {/* Contact Form */}
             <div className="lg:col-span-2">
               <div className="bg-card rounded-lg shadow-xl p-8">
-                <h2 className="text-2xl font-serif font-bold mb-6">Send us a Message</h2>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <h2 className="text-2xl font-serif font-bold mb-6">
+                  Send Us a Message
+                </h2>
+                <form
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className="space-y-6"
+                >
                   <div className="grid md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="name">Your Name</Label>
                       <Input
                         id="name"
-                        placeholder="John Doe"
+                        placeholder="Rahul Sharma"
                         {...form.register('name')}
                       />
                       {form.formState.errors.name && (
@@ -143,12 +173,13 @@ export default function Contact() {
                         </p>
                       )}
                     </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder="john@example.com"
+                        placeholder="rahul@example.com"
                         {...form.register('email')}
                       />
                       {form.formState.errors.email && (
@@ -163,7 +194,7 @@ export default function Contact() {
                     <Label htmlFor="subject">Subject</Label>
                     <Input
                       id="subject"
-                      placeholder="How can we help you?"
+                      placeholder="Room booking enquiry"
                       {...form.register('subject')}
                     />
                     {form.formState.errors.subject && (
@@ -177,7 +208,7 @@ export default function Contact() {
                     <Label htmlFor="message">Message</Label>
                     <Textarea
                       id="message"
-                      placeholder="Tell us more about your inquiry..."
+                      placeholder="Please share your requirements or questions..."
                       rows={5}
                       {...form.register('message')}
                     />
@@ -188,7 +219,12 @@ export default function Contact() {
                     )}
                   </div>
 
-                  <Button type="submit" variant="gold" size="lg" disabled={isSubmitting}>
+                  <Button
+                    type="submit"
+                    variant="gold"
+                    size="lg"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? (
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                     ) : (
@@ -203,10 +239,10 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Map Section */}
+      {/* 🇮🇳 Map Section (Location reference) */}
       <section className="h-96 bg-muted">
         <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.2219901290355!2d-74.00369368400567!3d40.71312937933185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a23e28c1191%3A0x49f75d3281df052a!2s150%20Park%20Row%2C%20New%20York%2C%20NY%2010007%2C%20USA!5e0!3m2!1sen!2s!4v1640000000000!5m2!1sen!2s"
+          src="https://www.google.com/maps"
           width="100%"
           height="100%"
           style={{ border: 0 }}

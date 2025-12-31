@@ -16,16 +16,17 @@ import { RoomCard } from "@/components/rooms/RoomCard";
 import heroImage from "@/assets/hero-hotel.jpg";
 import api from "@/lib/api";
 
-import { localRooms } from "@/data/rooms.local"; // 🔥 FRONTEND FALLBACK
+import { localRooms } from "@/data/rooms.local"; // 🇮🇳 Frontend fallback rooms data
 
 /* -------------------- Amenities -------------------- */
+/* 🇮🇳 Common hotel amenities expected by Indian travellers */
 
 const amenities = [
   { icon: Wifi, title: "Free WiFi", description: "High-speed internet throughout" },
-  { icon: UtensilsCrossed, title: "Fine Dining", description: "World-class cuisine" },
+  { icon: UtensilsCrossed, title: "Fine Dining", description: "Multi-cuisine restaurant" },
   { icon: Waves, title: "Spa & Pool", description: "Relax and rejuvenate" },
-  { icon: Car, title: "Valet Parking", description: "Complimentary service" },
-  { icon: Sparkles, title: "Room Service", description: "24/7 availability" },
+  { icon: Car, title: "Valet Parking", description: "Complimentary parking service" },
+  { icon: Sparkles, title: "Room Service", description: "24/7 room service available" },
   { icon: Shield, title: "Security", description: "Safe and secure stay" },
 ];
 
@@ -36,11 +37,11 @@ export default function Index() {
     queryKey: ["featured-rooms"],
     queryFn: async () => {
       try {
-        // 🔹 TRY BACKEND FIRST
+        // 🇮🇳 Fetch featured rooms from backend
         const res = await api.get("/rooms/featured");
         return res.data;
       } catch (err) {
-        // 🔥 BACKEND OFF → FRONTEND DATA
+        // 🇮🇳 Backend unavailable → use local demo data
         console.warn("Backend not available, using frontend featured rooms");
 
         return localRooms
@@ -56,7 +57,7 @@ export default function Index() {
 
   return (
     <Layout>
-      {/* Hero Section */}
+      {/* 🇮🇳 Hero Section */}
       <section className="relative h-screen min-h-[700px] flex items-center justify-center">
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -74,8 +75,8 @@ export default function Index() {
             <span className="block text-accent">Elegance</span>
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto">
-            Discover unparalleled comfort and sophistication at GrandHotel.
-            Where every moment becomes a cherished memory.
+            Discover unparalleled comfort and hospitality.
+            Where every stay becomes a memorable experience.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/rooms">
@@ -99,7 +100,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Amenities Section */}
+      {/* 🇮🇳 Amenities Section */}
       <section className="py-20 bg-secondary">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -131,7 +132,7 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Featured Rooms Section */}
+      {/* 🇮🇳 Featured Rooms Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
@@ -186,15 +187,15 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* 🇮🇳 CTA Section */}
       <section className="py-20 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-5xl font-serif font-bold mb-6">
-            Ready for an Unforgettable Stay?
+            Ready for a Comfortable Stay?
           </h2>
           <p className="text-primary-foreground/80 text-lg mb-8 max-w-2xl mx-auto">
-            Book your room today and experience the luxury you deserve.
-            Special rates available for extended stays.
+            Book your room today and enjoy premium hospitality.
+            Special offers available for longer stays.
           </p>
           <Link to="/rooms">
             <Button variant="hero" size="xl">

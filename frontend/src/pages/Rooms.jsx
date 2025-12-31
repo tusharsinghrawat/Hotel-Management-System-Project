@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 
 import api from "@/lib/api";
-import { localRooms } from "@/data/rooms.local"; // 🔥 FRONTEND FALLBACK DATA
+import { localRooms } from "@/data/rooms.local"; // 🇮🇳 Frontend fallback rooms data
 
 export default function Rooms() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +30,7 @@ export default function Rooms() {
     queryKey: ["rooms"],
     queryFn: async () => {
       try {
-        // 🔹 TRY BACKEND FIRST
+        // 🇮🇳 Fetch rooms from backend (prices are in INR per night)
         const res = await api.get("/rooms");
 
         return res.data.map((room) => {
@@ -57,7 +57,7 @@ export default function Rooms() {
           };
         });
       } catch (err) {
-        // 🔥 BACKEND OFF → USE FRONTEND DATA
+        // 🇮🇳 Backend unavailable → use local Indian demo room data
         console.warn("Backend not available, using frontend rooms data");
 
         return localRooms.map((room) => ({
@@ -84,6 +84,7 @@ export default function Rooms() {
         return matchesSearch && matchesType;
       })
       .sort((a, b) => {
+        // 🇮🇳 Sorting by room price (INR per night)
         if (priceSort === "low-high")
           return a.price_per_night - b.price_per_night;
         if (priceSort === "high-low")
@@ -94,7 +95,7 @@ export default function Rooms() {
 
   return (
     <Layout>
-      {/* Header */}
+      {/* 🇮🇳 Header section for room listings */}
       <section className="pt-32 pb-16 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
           <p className="text-accent font-medium tracking-widest mb-2 uppercase">
@@ -105,12 +106,12 @@ export default function Rooms() {
           </h1>
           <p className="text-primary-foreground/80 max-w-2xl mx-auto">
             Discover our collection of beautifully appointed rooms and suites,
-            each designed to provide the ultimate comfort and luxury.
+            each designed to provide comfort and luxury for Indian travellers.
           </p>
         </div>
       </section>
 
-      {/* Filters */}
+      {/* 🇮🇳 Filters: search, room type, price (INR) */}
       <section className="py-8 bg-secondary border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -158,7 +159,7 @@ export default function Rooms() {
         </div>
       </section>
 
-      {/* Rooms Grid */}
+      {/* 🇮🇳 Rooms grid */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           {isLoading ? (

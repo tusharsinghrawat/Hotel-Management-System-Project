@@ -26,7 +26,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import api from "@/lib/api"; // ✅ FIXED (default import)
+import api from "@/lib/api"; // 🇮🇳 Backend API integration
+
+/* -------------------- Status Colors -------------------- */
+/* 🇮🇳 Booking status flow used in Indian hotel operations */
 
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
@@ -44,6 +47,7 @@ export default function Admin() {
   const [isRoomDialogOpen, setIsRoomDialogOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
 
+  /* 🇮🇳 Room form used by hotel admin */
   const [roomForm, setRoomForm] = useState({
     name: "",
     description: "",
@@ -56,18 +60,19 @@ export default function Admin() {
     is_available: true,
   });
 
+  /* -------------------- Access Control -------------------- */
   useEffect(() => {
     if (!loading && (!user || !isAdmin)) {
       toast({
         variant: "destructive",
         title: "Access Denied",
-        description: "You don't have permission to access this page.",
+        description: "You do not have permission to access the admin panel.",
       });
       navigate("/");
     }
   }, [user, isAdmin, loading, navigate, toast]);
 
-  // ================= ROOMS =================
+  /* ================= ROOMS (ADMIN) ================= */
   const { data: rooms = [], isLoading: roomsLoading } = useQuery({
     queryKey: ["admin-rooms"],
     queryFn: async () => {
@@ -77,7 +82,7 @@ export default function Admin() {
     enabled: isAdmin,
   });
 
-  // ================= BOOKINGS =================
+  /* ================= BOOKINGS (ADMIN) ================= */
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["admin-bookings"],
     queryFn: async () => {
@@ -87,7 +92,7 @@ export default function Admin() {
     enabled: isAdmin,
   });
 
-  // ================= CREATE / UPDATE ROOM =================
+  /* ================= CREATE / UPDATE ROOM ================= */
   const roomMutation = useMutation({
     mutationFn: async (room) => {
       if (editingRoom) {
@@ -98,7 +103,7 @@ export default function Admin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-rooms"] });
-      toast({ title: editingRoom ? "Room updated" : "Room created" });
+      toast({ title: editingRoom ? "Room updated successfully" : "Room created successfully" });
       setIsRoomDialogOpen(false);
       resetRoomForm();
     },
@@ -111,28 +116,29 @@ export default function Admin() {
     },
   });
 
-  // ================= DELETE ROOM =================
+  /* ================= DELETE ROOM ================= */
   const deleteRoomMutation = useMutation({
     mutationFn: async (roomId) => {
       await api.delete(`/rooms/${roomId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-rooms"] });
-      toast({ title: "Room deleted" });
+      toast({ title: "Room deleted successfully" });
     },
   });
 
-  // ================= UPDATE BOOKING STATUS =================
+  /* ================= UPDATE BOOKING STATUS ================= */
   const updateBookingMutation = useMutation({
     mutationFn: async ({ id, status }) => {
       await api.patch(`/bookings/${id}`, { status });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-bookings"] });
-      toast({ title: "Booking updated" });
+      toast({ title: "Booking status updated" });
     },
   });
 
+  /* -------------------- Helpers -------------------- */
   const resetRoomForm = () => {
     setRoomForm({
       name: "",
@@ -169,7 +175,7 @@ export default function Admin() {
       name: roomForm.name,
       description: roomForm.description || null,
       room_type: roomForm.room_type,
-      price_per_night: Number(roomForm.price_per_night),
+      price_per_night: Number(roomForm.price_per_night), // ₹ INR per night
       capacity: Number(roomForm.capacity),
       size_sqft: roomForm.size_sqft ? Number(roomForm.size_sqft) : null,
       amenities: roomForm.amenities
@@ -196,9 +202,11 @@ export default function Admin() {
     <Layout>
       <div className="pt-32 pb-16 min-h-screen bg-secondary">
         <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-serif font-bold mb-2">Admin Dashboard</h1>
+          <h1 className="text-4xl font-serif font-bold mb-2">
+            Admin Dashboard
+          </h1>
           <p className="text-muted-foreground mb-8">
-            Manage rooms and bookings
+            Manage hotel rooms, pricing, availability, and bookings
           </p>
 
           {/* ⬇️ JSX CONTENT SAME AS BEFORE ⬇️ */}

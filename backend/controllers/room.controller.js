@@ -1,13 +1,14 @@
 import Room from "../models/Room.js";
 
-// 🔥 helper function (UPDATED for frontend images)
+// 🔥 helper function
+// 🇮🇳 Normalize room image for frontend display (common practice in Indian hotel sites)
 const normalizeImages = (room) => {
   const data = room._doc ? room._doc : room;
 
   return {
     ...data,
 
-    // ✅ single image field (frontend handles path)
+    // 🇮🇳 Single image field handled by frontend
     image:
       typeof data.image === "string" && data.image.trim()
         ? data.image.trim()
@@ -18,6 +19,7 @@ const normalizeImages = (room) => {
 /**
  * @desc   Get all rooms
  * @route  GET /api/rooms
+ * 🇮🇳 Used to display room listings with INR-based pricing on frontend
  */
 export const getAllRooms = async (req, res) => {
   try {
@@ -32,6 +34,7 @@ export const getAllRooms = async (req, res) => {
 /**
  * @desc   Get single room
  * @route  GET /api/rooms/:id
+ * 🇮🇳 Used on room detail page before booking
  */
 export const getRoomById = async (req, res) => {
   try {
@@ -48,6 +51,7 @@ export const getRoomById = async (req, res) => {
 /**
  * @desc   Create room (Admin)
  * @route  POST /api/rooms
+ * 🇮🇳 Admin creates room with price in INR per night
  */
 export const createRoom = async (req, res) => {
   try {
@@ -61,6 +65,7 @@ export const createRoom = async (req, res) => {
 /**
  * @desc   Update room (Admin)
  * @route  PUT /api/rooms/:id
+ * 🇮🇳 Admin updates room details, pricing, availability
  */
 export const updateRoom = async (req, res) => {
   try {
@@ -78,6 +83,7 @@ export const updateRoom = async (req, res) => {
 /**
  * @desc   Delete room (Admin)
  * @route  DELETE /api/rooms/:id
+ * 🇮🇳 Remove room from hotel inventory
  */
 export const deleteRoom = async (req, res) => {
   try {
@@ -91,6 +97,7 @@ export const deleteRoom = async (req, res) => {
 /**
  * @desc   Get featured rooms
  * @route  GET /api/rooms/featured
+ * 🇮🇳 Used on homepage to show available rooms (Indian hotel landing pages)
  */
 export const getFeaturedRooms = async (req, res) => {
   try {

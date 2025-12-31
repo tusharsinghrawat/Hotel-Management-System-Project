@@ -7,6 +7,7 @@ import Booking from "../models/Booking.js";
  */
 export const createBooking = async (req, res) => {
   try {
+    // 🇮🇳 User authentication check (mandatory in Indian booking systems)
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "Not authorized" });
     }
@@ -16,30 +17,35 @@ export const createBooking = async (req, res) => {
       checkInDate,
       checkOutDate,
       guests,
-      totalPrice,
+      totalPrice, // 🇮🇳 Final payable amount in INR (GST included, calculated on frontend)
     } = req.body;
 
+    // 🇮🇳 Basic booking validation
     if (!room || !checkInDate || !checkOutDate || !guests) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
+    // 🇮🇳 Dates stored in DB, frontend should display DD/MM/YYYY
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
 
+    // 🇮🇳 Check-out must be after check-in (standard hotel rule)
     if (checkOut <= checkIn) {
       return res
         .status(400)
         .json({ message: "Check-out must be after check-in" });
     }
 
+    // 🇮🇳 Total price in INR (fallback safety)
     const finalPrice = totalPrice || 0;
 
+    // 🇮🇳 Create booking record
     const booking = await Booking.create({
       user: req.user._id,
       room,
       checkInDate: checkIn,
       checkOutDate: checkOut,
-      guests,
+      guests,        // Adults count as per Indian hotel convention
       totalPrice: finalPrice,
     });
 
@@ -57,13 +63,14 @@ export const createBooking = async (req, res) => {
  */
 export const getMyBookings = async (req, res) => {
   try {
+    // 🇮🇳 Only logged-in user can view their bookings
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "Not authorized" });
     }
 
     const bookings = await Booking.find({
       user: req.user._id,
-    }).populate("room");
+    }).populate("room"); // 🇮🇳 Populate room details for booking summary
 
     res.json(bookings);
   } catch (error) {
@@ -72,7 +79,6 @@ export const getMyBookings = async (req, res) => {
 };
 
 /**
- * ✅ NEW (REQUIRED)
  * @desc   Get bookings by room (for availability calendar)
  * @route  GET /api/bookings/room/:roomId
  * @access Public
@@ -81,12 +87,13 @@ export const getBookingsByRoom = async (req, res) => {
   try {
     const { roomId } = req.params;
 
+    // 🇮🇳 Used for room availability calendar (Indian hotel practice)
     const bookings = await Booking.find(
       { room: roomId },
       "checkInDate checkOutDate"
     );
 
-    // 🔥 Frontend expects: check_in / check_out
+    // 🇮🇳 Frontend expects simplified keys for calendar usage
     const formatted = bookings.map((b) => ({
       check_in: b.checkInDate,
       check_out: b.checkOutDate,

@@ -10,6 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 
+/* -------------------- Status Badge Colors -------------------- */
+/* 🇮🇳 Booking lifecycle commonly used in Indian hotel systems */
+
 const statusColors = {
   pending: "bg-yellow-100 text-yellow-800",
   confirmed: "bg-green-100 text-green-800",
@@ -21,12 +24,14 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
+  // 🇮🇳 Redirect unauthenticated users to login
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
   }, [user, loading, navigate]);
 
+  /* -------------------- Fetch User Bookings -------------------- */
   const { data: bookings = [], isLoading } = useQuery({
     queryKey: ["user-bookings"],
     queryFn: async () => {
@@ -36,6 +41,7 @@ export default function Dashboard() {
     enabled: !!user,
   });
 
+  /* -------------------- Auth Loading -------------------- */
   if (loading) {
     return (
       <Layout>
@@ -50,17 +56,17 @@ export default function Dashboard() {
     <Layout>
       <div className="pt-32 pb-16 min-h-screen bg-secondary">
         <div className="container mx-auto px-4">
-          {/* Welcome */}
+          {/* 🇮🇳 Welcome Section */}
           <div className="mb-12">
             <h1 className="text-4xl font-serif font-bold mb-2">
               Welcome, {user?.name || "Guest"}
             </h1>
             <p className="text-muted-foreground">
-              Manage your bookings and account details
+              View and manage your hotel bookings
             </p>
           </div>
 
-          {/* Stats */}
+          {/* 🇮🇳 Booking Summary Stats */}
           <div className="grid md:grid-cols-3 gap-6 mb-12">
             <StatCard
               icon={<Calendar className="h-6 w-6 text-accent" />}
@@ -79,8 +85,10 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Booking List */}
-          <h2 className="text-2xl font-serif font-bold mb-6">Your Bookings</h2>
+          {/* 🇮🇳 Booking List */}
+          <h2 className="text-2xl font-serif font-bold mb-6">
+            Your Bookings
+          </h2>
 
           {isLoading ? (
             <div className="flex justify-center py-12">
@@ -93,6 +101,7 @@ export default function Dashboard() {
                   key={booking._id}
                   className="bg-card rounded-lg shadow-md p-6 flex flex-col md:flex-row gap-6"
                 >
+                  {/* Room Image */}
                   <div className="w-full md:w-48 h-32 rounded-lg overflow-hidden">
                     <img
                       src={
@@ -105,6 +114,7 @@ export default function Dashboard() {
                     />
                   </div>
 
+                  {/* Booking Details */}
                   <div className="flex-1">
                     <div className="flex justify-between mb-2">
                       <h3 className="text-xl font-serif font-semibold">
@@ -143,7 +153,7 @@ export default function Dashboard() {
                         <p>{booking.guests}</p>
                       </div>
                       <div>
-                        <p className="font-medium">Total</p>
+                        <p className="font-medium">Total Amount</p>
                         <p className="text-accent font-bold">
                           ₹{booking.totalPrice}
                         </p>
@@ -166,6 +176,9 @@ export default function Dashboard() {
               <h3 className="text-lg font-semibold mb-2">
                 No Bookings Yet
               </h3>
+              <p className="text-muted-foreground mb-4">
+                You have not made any reservations yet.
+              </p>
               <Button variant="gold" onClick={() => navigate("/rooms")}>
                 Browse Rooms
               </Button>
@@ -177,7 +190,9 @@ export default function Dashboard() {
   );
 }
 
-/* Small reusable stat card */
+/* -------------------- Reusable Stat Card -------------------- */
+/* 🇮🇳 Used for booking overview on dashboard */
+
 function StatCard({ icon, label, value }) {
   return (
     <div className="bg-card rounded-lg shadow-md p-6 flex items-center gap-4">

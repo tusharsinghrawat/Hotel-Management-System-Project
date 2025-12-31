@@ -81,7 +81,7 @@ export const localRooms = [
     size_sqft: 620,
     amenities: ["WiFi", "TV", "AC", "Jacuzzi"],
     image: "room-7.jpg",
-    is_available: false,
+    is_available: true,
   },
   {
     _id: "8",
