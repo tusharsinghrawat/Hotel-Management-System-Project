@@ -21,12 +21,6 @@ This project is designed with **Indian hotel standards**, INR (₹) pricing, and
 - View and update booking status
 - Role-based access control (Admin only)
 
-### 🇮🇳 Indian Standard Enhancements
-- Pricing displayed in **₹ INR**
-- Room rates decided by **room type** (Standard, Deluxe, Suite, Presidential)
-- Indian-style booking flow
-- Clean and professional UI suitable for Indian hotel systems
-
 
 ## 🧑‍💻 Tech Stack
 
